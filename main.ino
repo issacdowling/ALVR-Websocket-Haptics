@@ -1,5 +1,22 @@
 int LED = 2; // Set LED Pin to 2
 
+// Must be floats not ints, or division happens weirdly
+float min_haptic_value = 120; // Set the minimum threshold for "on" to 110 of 255
+float max_haptic_value = 255; // Set max threshold to 255
+int pwm_value;
+
+void vibe(int duration, int intensity){
+  //Normalise intensity from 0-100 to range 120-255
+  pwm_value = min_haptic_value+(intensity*((max_haptic_value-min_haptic_value)/100));
+  //Jumpstart the motor at max intensity for 20ms to allow starting at low intensities
+  analogWrite(LED, 255);
+  delay(20);
+  //Set motor to selected intensity for as long as input
+  analogWrite(LED, pwm_value); // Set LED speed
+  delay(duration);
+  //After duration complete, stop motor
+  analogWrite(LED, 0);
+}
 
 void setup() {
     Serial.begin(9600); // open the serial port at 9600 bps:
@@ -8,15 +25,8 @@ void setup() {
 }
 
 void loop() {
-
-    // for(int duty_cycle = 255;  duty_cycle > 113; duty_cycle--) {
-    //     Serial.print(duty_cycle);
-    //     Serial.print("\n");
-    //     analogWrite(LED, 120); // Set LED speed
-    //     delay(200); // wait
-    // }
-    long myInt = Serial.parseInt();
-    Serial.print(myInt);
+    long input_percent = Serial.parseInt();
+    Serial.print(pwm_value);
     Serial.print("\n");
-    analogWrite(LED, myInt); // Set LED speed
+    vibe(1000, input_percent);
 }
