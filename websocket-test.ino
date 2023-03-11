@@ -4,53 +4,62 @@
 #include <ArduinoWebsockets.h>
 #include <ESP8266WiFi.h>
 
-
-const String IP = "10.0.0.2";
 const char* ssid = ""; //Enter SSID
 const char* password = ""; //Enter Password
+const char* websockets_server = "ws://10.0.0.2:8082/api/events-legacy"; //server adress and port
 
 using namespace websockets;
 
-WebsocketsClient client;
+void onMessageCallback(WebsocketsMessage msg) {
+  StaticJsonDocument<999> json;
+  String message = msg.data();
+  
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(json, message);
 
-StaticJsonDocument<200> doc;
-
-void setup() {
-  Serial.begin(9600); // open the serial port at 9600 bps
-
-  // Connect to wifi
-  WiFi.begin(ssid, password);
-
-  // Wait for wifi connection
-  for(int i = 0; i < 10 && WiFi.status() != WL_CONNECTED; i++) {
-      Serial.print(".");
-      delay(1000);
+  // Test if parsing succeeds.
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return;
   }
 
-  String PC_ALVR_ADDRESS = "ws://" + IP + ":8082/api/events";
-  client.connect(PC_ALVR_ADDRESS);
+  String id = json["id"];
 
-  client.onMessage([](WebsocketsMessage msg){
-    DeserializationError error = deserializeJson(doc, msg.rawData());
-    Serial.println(msg.rawData().c_str());
+  if (id=="Haptics") {
+    Serial.println("Test");
+  }
 
-      if (error) {
-        Serial.print(F("deserializeJson() failed: "));
-        Serial.println(error.f_str());
-        return;
-      }
+}
 
-  });
+void onEventsCallback(WebsocketsEvent event, String data) {
+    if(event == WebsocketsEvent::ConnectionOpened) {
+        Serial.println("Connnection Opened");
+    } else if(event == WebsocketsEvent::ConnectionClosed) {
+        Serial.println("Connnection Closed");
+    }
+}
 
+WebsocketsClient client;
+void setup() {
+    Serial.begin(115200);
+    // Connect to wifi
+    WiFi.begin(ssid, password);
 
+    // Wait some time to connect to wifi
+    for(int i = 0; i < 10 && WiFi.status() != WL_CONNECTED; i++) {
+        Serial.print(".");
+        delay(1000);
+    }
 
-  String test = doc["id"];
-  Serial.println(test);
-
+    // Setup Callbacks
+    client.onMessage(onMessageCallback);
+    client.onEvent(onEventsCallback);
+    
+    // Connect to server
+    client.connect(websockets_server);
 }
 
 void loop() {
-  client.poll();
+    client.poll();
 }
-
-
