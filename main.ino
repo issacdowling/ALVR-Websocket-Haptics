@@ -13,6 +13,7 @@ const int MOTOR = 16; // Set MOTOR Pin to 16
 // Must be floats not ints, or division happens weirdly
 const float MIN_HAPTIC_VALUE = 120; // Set the minimum threshold for "on" to 110 of 255
 const float MAX_HAPTIC_VALUE = 255; // Set max threshold to 255
+const int JUMPSTART_LENGTH = 20;
 int pwm_value;
 
 const char* SSID = ""; //Enter SSID
@@ -27,14 +28,18 @@ void vibe(int duration, int intensity){
   Serial.println(duration);
   Serial.println(intensity);
 
+  if (duration<50){
+    duration = 50;
+  }
+
   //Normalise intensity from 0-100 to range 120-255
   pwm_value = MIN_HAPTIC_VALUE+(intensity*((MAX_HAPTIC_VALUE-MIN_HAPTIC_VALUE)/100));
   //Jumpstart the motor at max intensity for 20ms when at low intensities
   analogWrite(MOTOR, 255);
-  delay(20);
+  delay(JUMPSTART_LENGTH);
   //Set motor to selected intensity for as long as input
   analogWrite(MOTOR, pwm_value); // Set MOTOR speed
-  delay(duration);
+  delay(duration-JUMPSTART_LENGTH);
   //After duration complete, stop motor
   analogWrite(MOTOR, 0);
 
