@@ -44,12 +44,10 @@ void vibe(int duration, int intensity){
 
 void onMessageCallback(WebsocketsMessage msg) {
   //PARSE JSON
-    
-    String message = msg.data();
     // Deserialize the JSON document IF not empty
     if(!msg.isEmpty()){
       StaticJsonDocument<999> json;
-      DeserializationError error = deserializeJson(json, message);
+      DeserializationError error = deserializeJson(json, msg.data());
 
       // Test if parsing succeeds.
       if (error) {
@@ -70,7 +68,7 @@ void onMessageCallback(WebsocketsMessage msg) {
             
           // Debounces
           now_called_millis = millis();
-          if (last_called_millis - now_called_millis < 50) {
+          if (now_called_millis - last_called_millis  > 50) {
             last_called_millis = now_called_millis;
             vibe((length.toInt()/1000000), (amplitude.toInt()*100));
 
@@ -80,8 +78,8 @@ void onMessageCallback(WebsocketsMessage msg) {
       }
     }
 
-
 }
+
 
 
 void onEventsCallback(WebsocketsEvent event, String data) {
