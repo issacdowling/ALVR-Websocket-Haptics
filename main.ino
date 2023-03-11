@@ -24,27 +24,21 @@ using namespace websockets;
 
 void vibe(int duration, int intensity){
 
-  now_called_millis = millis();
+  Serial.println(duration);
+  Serial.println(intensity);
 
-  // Debounces
-  if (last_called_millis - now_called_millis < 50) {
-    last_called_millis = now_called_millis;
+  //Normalise intensity from 0-100 to range 120-255
+  pwm_value = MIN_HAPTIC_VALUE+(intensity*((MAX_HAPTIC_VALUE-MIN_HAPTIC_VALUE)/100));
+  //Jumpstart the motor at max intensity for 20ms when at low intensities
+  analogWrite(MOTOR, 255);
+  delay(20);
+  //Set motor to selected intensity for as long as input
+  analogWrite(MOTOR, pwm_value); // Set MOTOR speed
+  delay(duration);
+  //After duration complete, stop motor
+  analogWrite(MOTOR, 0);
 
-    Serial.println(duration);
-    Serial.println(intensity);
 
-    //Normalise intensity from 0-100 to range 120-255
-    pwm_value = MIN_HAPTIC_VALUE+(intensity*((MAX_HAPTIC_VALUE-MIN_HAPTIC_VALUE)/100));
-    //Jumpstart the motor at max intensity for 20ms when at low intensities
-    analogWrite(MOTOR, 255);
-    delay(20);
-    //Set motor to selected intensity for as long as input
-    analogWrite(MOTOR, pwm_value); // Set MOTOR speed
-    delay(duration);
-    //After duration complete, stop motor
-    analogWrite(MOTOR, 0);
-
-  }
 
 }
 
@@ -73,7 +67,14 @@ void onMessageCallback(WebsocketsMessage msg) {
         if (recieved_path==PATH){
           String length = json["data"]["duration"]["nanos"];
           String amplitude = json["data"]["amplitude"];
-          vibe((length.toInt()/1000000), (amplitude.toInt()*100));
+            
+          // Debounces
+          now_called_millis = millis();
+          if (last_called_millis - now_called_millis < 50) {
+            last_called_millis = now_called_millis;
+            vibe((length.toInt()/1000000), (amplitude.toInt()*100));
+
+          }
         }
 
       }
