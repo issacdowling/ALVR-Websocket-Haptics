@@ -4,31 +4,32 @@
 #include <ArduinoWebsockets.h>
 #include <ESP8266WiFi.h>
 
-const char* ssid = ""; //Enter SSID
-const char* password = ""; //Enter Password
+const char* ssid = "issac_iot"; //Enter SSID
+const char* password = "10td3v1c3s!"; //Enter Password
 const char* websockets_server = "ws://10.0.0.2:8082/api/events-legacy"; //server adress and port
 
 using namespace websockets;
 
 void onMessageCallback(WebsocketsMessage msg) {
-  StaticJsonDocument<999> json;
-  String message = msg.data();
-  
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(json, message);
+  //PARSE JSON
+    StaticJsonDocument<999> json;
+    String message = msg.data();
+    // Deserialize the JSON document
+    DeserializationError error = deserializeJson(json, message);
+    // Test if parsing succeeds.
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.f_str());
+      return;
+    }
 
-  // Test if parsing succeeds.
-  if (error) {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.f_str());
-    return;
-  }
-
-  String id = json["id"];
-
-  if (id=="Haptics") {
-    Serial.println("Test");
-  }
+  //CHECK WHETHER MESSAGE IS FOR THIS DEVICE
+    //Check if a haptic message
+    String id = json["id"];
+    if (id=="Haptics") {
+      //Here will go controller checking later
+      Serial.println(message);
+    }
 
 }
 
