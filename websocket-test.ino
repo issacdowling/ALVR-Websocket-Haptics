@@ -4,8 +4,8 @@
 #include <ArduinoWebsockets.h>
 #include <ESP8266WiFi.h>
 
-const char* ssid = "issac_iot"; //Enter SSID
-const char* password = "10td3v1c3s!"; //Enter Password
+const char* ssid = ""; //Enter SSID
+const char* password = ""; //Enter Password
 const char* websockets_server = "ws://10.0.0.2:8082/api/events-legacy"; //server adress and port
 
 using namespace websockets;
@@ -28,10 +28,15 @@ void onMessageCallback(WebsocketsMessage msg) {
     String id = json["id"];
     if (id=="Haptics") {
       //Here will go controller checking later
-      Serial.println(message);
+      //String extra = json["data"]["path"]; ("/user/hand/right" or left)
+      String length = json["data"]["duration"]["nanos"];
+      String amplitude = json["data"]["amplitude"];
+      Serial.println(length);
+      Serial.println(amplitude);
     }
 
 }
+
 
 void onEventsCallback(WebsocketsEvent event, String data) {
     if(event == WebsocketsEvent::ConnectionOpened) {
