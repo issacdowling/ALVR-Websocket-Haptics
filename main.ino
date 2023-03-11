@@ -8,22 +8,23 @@
 //DEBOUNCE INPUTS BEFORE BEING SENT TO VIBE()
 //Clean up inputs
 
-int MOTOR = 16; // Set MOTOR Pin to 16
+const int MOTOR = 16; // Set MOTOR Pin to 16
 
 // Must be floats not ints, or division happens weirdly
-float min_haptic_value = 120; // Set the minimum threshold for "on" to 110 of 255
-float max_haptic_value = 255; // Set max threshold to 255
+const float MIN_HAPTIC_VALUE = 120; // Set the minimum threshold for "on" to 110 of 255
+const float MAX_HAPTIC_VALUE = 255; // Set max threshold to 255
 int pwm_value;
 
-const char* ssid = ""; //Enter SSID
-const char* password = ""; //Enter Password
-const char* websockets_server = "ws://10.0.0.2:8082/api/events-legacy"; //server adress and port
+const char* SSID = ""; //Enter SSID
+const char* PASSWORD = ""; //Enter Password
+const char* ALVR_ENDPOINT = "ws://10.0.0.2:8082/api/events-legacy"; //ALVR endpoint
+const char* PATH = "/user/hand/right";
 
 using namespace websockets;
 
 void vibe(int duration, int intensity){
   //Normalise intensity from 0-100 to range 120-255
-  pwm_value = min_haptic_value+(intensity*((max_haptic_value-min_haptic_value)/100));
+  pwm_value = MIN_HAPTIC_VALUE+(intensity*((MAX_HAPTIC_VALUE-MIN_HAPTIC_VALUE)/100));
   //Jumpstart the motor at max intensity for 20ms when at low intensities
   if(intensity<20){
     analogWrite(MOTOR, 255);
@@ -65,13 +66,16 @@ void onMessageCallback(WebsocketsMessage msg) {
       //Check if a haptic message
       String id = json["id"];
       if (id=="Haptics") {
-        //Here will go controller checking later
-        //String extra = json["data"]["path"]; ("/user/hand/right" or left)
-        String length = json["data"]["duration"]["nanos"];
-        String amplitude = json["data"]["amplitude"];
-        Serial.println(length.toInt()/1000000);
-        Serial.println(amplitude.toInt()*100);
-        vibe((length.toInt()/1000000), (amplitude.toInt()*100));
+        //Check that the message is for the correct hand
+        String recieved_path = json["data"]["path"];
+        if (recieved_path==PATH){
+          String length = json["data"]["duration"]["nanos"];
+          String amplitude = json["data"]["amplitude"];
+          Serial.println(length.toInt()/1000000);
+          Serial.println(amplitude.toInt()*100);
+          vibe((length.toInt()/1000000), (amplitude.toInt()*100));
+        }
+
       }
     }
 
@@ -92,7 +96,7 @@ void setup() {
     pinMode(MOTOR, OUTPUT);
     Serial.begin(115200);
     // Connect to wifi
-    WiFi.begin(ssid, password);
+    WiFi.begin(SSID, PASSWORD);
 
     // Wait some time to connect to wifi
     for(int i = 0; i < 10 && WiFi.status() != WL_CONNECTED; i++) {
@@ -105,7 +109,7 @@ void setup() {
     client.onEvent(onEventsCallback);
     
     // Connect to server
-    client.connect(websockets_server);
+    client.connect(ALVR_ENDPOINT);
 }
 
 void loop() {
