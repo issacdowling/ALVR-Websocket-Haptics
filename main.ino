@@ -16,6 +16,9 @@ const float MAX_HAPTIC_VALUE = 255; // Set max threshold to 255
 const int JUMPSTART_LENGTH = 20;
 int pwm_value;
 
+long now_called_millis; //The time in milliseconds that the vibration was attempted to be called
+long last_called_millis = 0; //The time in milliseconds that the vubration was actually called
+
 const char* SSID = ""; //Enter SSID
 const char* PASSWORD = ""; //Enter Password
 const char* ALVR_ENDPOINT = "ws://10.0.0.2:8082/api/events-legacy"; //ALVR endpoint
