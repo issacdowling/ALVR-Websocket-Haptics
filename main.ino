@@ -4,6 +4,10 @@
 #include <ArduinoWebsockets.h>
 #include <ESP8266WiFi.h>
 
+
+//DEBOUNCE INPUTS BEFORE BEING SENT TO VIBE()
+//Clean up inputs
+
 int MOTOR = 16; // Set MOTOR Pin to 16
 
 // Must be floats not ints, or division happens weirdly
@@ -20,9 +24,21 @@ using namespace websockets;
 void vibe(int duration, int intensity){
   //Normalise intensity from 0-100 to range 120-255
   pwm_value = min_haptic_value+(intensity*((max_haptic_value-min_haptic_value)/100));
-  //Jumpstart the motor at max intensity for 20ms to allow starting at low intensities
-  analogWrite(MOTOR, 255);
-  delay(20);
+  //Jumpstart the motor at max intensity for 20ms when at low intensities
+  if(intensity<20){
+    analogWrite(MOTOR, 255);
+    delay(20);
+    if (duration<50){
+      duration = 50;
+    }
+    if (intensity<10){
+      intensity = 10;
+    }
+  }
+  if(duration<20){
+    duration = 20;
+  }
+  
   //Set motor to selected intensity for as long as input
   analogWrite(MOTOR, pwm_value); // Set MOTOR speed
   delay(duration);
