@@ -28,10 +28,6 @@ using namespace websockets;
 
 void vibe(int duration, int intensity){
 
-  if (duration<20){
-    duration = 20;
-  }
-
   if(intensity<30){
     intensity = 100;
   }
