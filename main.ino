@@ -84,7 +84,7 @@ void onMessageCallback(WebsocketsMessage msg) {
             
           // Debounces
           now_called_millis = millis();
-          if (now_called_millis - last_called_millis  > 30) {
+          if (now_called_millis - last_called_millis  > MIN_DURATION+10) {
             last_called_millis = now_called_millis;
             vibe((length.toInt()/1000000), (amplitude.toInt()*100));
 
