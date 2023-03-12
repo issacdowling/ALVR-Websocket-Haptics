@@ -65,10 +65,11 @@ void onMessageCallback(WebsocketsMessage msg) {
       StaticJsonDocument<600> json;
       DeserializationError error = deserializeJson(json, msg.data());
 
-      // Test if parsing succeeds.
+      // Test if parsing succeeds. If not, print an error and the message that caused it
       if (error) {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
+        Serial.println(msg.data());
         return;
       }
 
