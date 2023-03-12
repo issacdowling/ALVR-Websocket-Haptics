@@ -11,10 +11,14 @@
 const int MOTOR = 16; // Set MOTOR Pin to 16
 
 // Must be floats not ints, or division happens weirdly
-const float MIN_HAPTIC_VALUE = 120; // Set the minimum threshold for "on" to 110 of 255
+const float MIN_HAPTIC_VALUE = 160; // Set the minimum threshold for "on" to 160 of 255
 const float MAX_HAPTIC_VALUE = 255; // Set max threshold to 255
 const int JUMPSTART_LENGTH = 20;
 int pwm_value;
+
+//DATA CORRECTION VALUES
+const int MIN_DURATION = 20; //If received duration lower, it will be set to this (ms)
+const int MIN_INTENSITY = 30; //If received intensity lower, it will be set to this (0-100)
 
 long now_called_millis; //The time in milliseconds that the vibration was attempted to be called
 long last_called_millis = 0; //The time in milliseconds that the vubration was actually called
@@ -28,8 +32,12 @@ using namespace websockets;
 
 void vibe(int duration, int intensity){
 
-  if(intensity<30){
-    intensity = 100;
+  if (duration < MIN_DURATION){
+    duration = MIN_DURATION;
+  }
+
+  if(intensity < MIN_INTENSITY){
+    intensity = MIN_INTENSITY;
   }
 
   Serial.println(duration);
