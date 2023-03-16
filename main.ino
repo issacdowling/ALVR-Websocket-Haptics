@@ -8,7 +8,7 @@
 //DEBOUNCE INPUTS BEFORE BEING SENT TO VIBE()
 //Clean up inputs
 
-const int MOTOR = 16; // Set MOTOR Pin to 16
+const int MOTOR = 5; // Set MOTOR Pin to 16
 
 // Must be floats not ints, or division happens weirdly
 const float MIN_HAPTIC_VALUE = 160; // Set the minimum threshold for "on" to 160 of 255
